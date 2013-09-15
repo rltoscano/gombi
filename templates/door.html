@@ -1,0 +1,33 @@
+{{define "door"}}
+<html>
+  <head>
+    <meta name="viewport"
+        content="initial-scale=1.0, maximum-scale=1.0, user-scalable=no, width=device-width"/>
+  </head>
+  <body>
+    {{if .IsAdmin}}
+      {{range .PendingUsers}}
+        <form action="/api/door/authorize" method="POST">
+          <input type="hidden" name="user_id" value="{{.Id}}"/>
+          <button type="submit">Authorize</button> {{.DisplayName}}
+        </form>
+      {{end}}
+      {{range .AuthorizedUsers}}
+        <form action="/api/door/revoke" method="POST">
+          <input type="hidden" name="user_id" value="{{.Id}}"/>
+          <button type="submit">Revoke</button> {{.DisplayName}}
+        </form>
+      {{end}}
+    {{end}}
+    {{if .IsAuthorized}}
+      <form action="/api/door/open" method="POST">
+        <button style="width: 100px; height: 100px;" type="submit">Open Door</button>
+      </form>
+    {{else}}
+      <form action="api/door/join" method="POST">
+        <button type="submit">Join</button>
+      </form>
+    {{end}}
+  </body>
+</html>
+{{end}}
