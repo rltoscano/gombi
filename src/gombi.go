@@ -3,6 +3,7 @@ package gombi
 import(
   "html/template"
   "net/http"
+  "src/door"
 )
 
 // TODO(robert): Add XSRF protection with XSRF token.
@@ -10,7 +11,7 @@ import(
 // Main entry point.
 func init() {
   http.HandleFunc("/", handleRoot)
-  RegisterDoorHandlers()
+  door.RegisterHandlers()
 }
 
 func handleRoot(w http.ResponseWriter, r *http.Request) {

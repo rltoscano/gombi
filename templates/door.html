@@ -5,27 +5,60 @@
         content="initial-scale=1.0, maximum-scale=1.0, user-scalable=no, width=device-width"/>
   </head>
   <body>
-    {{if .IsAdmin}}
-      {{range .PendingUsers}}
-        <form action="/api/door/authorize" method="POST">
-          <input type="hidden" name="user_id" value="{{.Id}}"/>
-          <button type="submit">Authorize</button> {{.DisplayName}}
-        </form>
+    <form action="/api/door/apply" method="POST">
+      <input type="text" name="door_key" placeholder="Door Key"/>
+      <button type="submit">Apply for Access</button>
+    </form>
+
+    <ul>
+      {{range .Doors}}
+        <li>
+          Door "{{.DisplayName}}" owned by
+          {{if .Own}}me{{else}}"{{.OwnerDisplayName}}"{{end}}
+          <br/>
+          {{if .Openable}}
+            <form action="/api/door/open" method="POST">
+              <input type="hidden" name="door_key" value="{{.Key}}"/>
+              <button type="submit">Open</button>
+            </form>
+          {{end}}
+          {{if .Own}}
+            {{$dKey := .Key}}
+            Pending Users<br/>
+            <ul>
+              {{range .PendingUsers}}
+                <li>
+                  <form action="/api/door/authorize" method="POST">
+                    <input type="hidden" name="user_key" value="{{.Key}}"/>
+                    <input type="hidden" name="door_key" value="{{$dKey}}"/>
+                    <button type="submit">Authorize</button> {{.DisplayName}}
+                  </form>
+                </li>
+              {{else}}
+                There are no pending users.
+              {{end}}
+            </ul>
+
+            Opener Users<br/>
+            <ul>
+              {{range .OpenerUsers}}
+                <li>{{.DisplayName}}</li>
+              {{else}}
+                There are no opener users.
+              {{end}}
+            </ul>
+          {{end}}
+        </li>
+      {{else}}
+        You don't have access to any doors.
       {{end}}
-      {{range .AuthorizedUsers}}
-        <form action="/api/door/revoke" method="POST">
-          <input type="hidden" name="user_id" value="{{.Id}}"/>
-          <button type="submit">Revoke</button> {{.DisplayName}}
-        </form>
-      {{end}}
-    {{end}}
-    {{if .IsAuthorized}}
-      <form action="/api/door/open" method="POST">
-        <button style="width: 100px; height: 100px;" type="submit">Open Door</button>
-      </form>
-    {{else}}
-      <form action="api/door/join" method="POST">
-        <button type="submit">Join</button>
+    </ul>
+
+    {{if .Admin}}
+      <form action="/api/door/create" method="POST">
+        <input type="text" name="reg_id" placeholder="Registration Id"/><br/>
+        <input type="text" name="device_id" placeholder="Device Id"/><br/>
+        <button type="submit">Create Door</button>
       </form>
     {{end}}
   </body>
