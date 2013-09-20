@@ -36,3 +36,14 @@ indexes:
   - name: DoorId
   - name: UserId
   - name: Level
+
+- kind: Permission
+  properties:
+  - name: doorKey
+  - name: userKey
+  - name: level
+
+- kind: Permission
+  properties:
+  - name: userKey
+  - name: level

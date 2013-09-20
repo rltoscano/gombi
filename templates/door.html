@@ -1,48 +1,112 @@
 {{define "door"}}
 <html>
   <head>
-    <meta name="viewport"
-        content="initial-scale=1.0, maximum-scale=1.0, user-scalable=no, width=device-width"/>
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js">
+    </script>
+    <script>
+      function insertPermission() {
+        $.ajax({
+          url: "/api/permissions",
+          type: "POST",
+          data: {doorKey: $("#permissionInsert-doorKey").val()}
+        });
+      }
+
+      function updatePermission(userKey, doorKey, level) {
+        $.ajax({
+          url: "/api/permissions",
+          type: "PUT",
+          data: {userKey: userKey, doorKey: doorKey, level: level}
+        });
+      }
+
+      function deletePermission(userKey, doorKey) {
+        $.ajax({
+          url: "/api/permissions?userKey=" + userKey + "&doorKey=" + doorKey,
+          type: "DELETE"
+        });
+      }
+
+      function insertDoor() {
+        $.ajax({
+          url: "/api/doors",
+          type: "POST",
+          data: {
+            displayName: $("#doorInsert-displayName").val(),
+            regId: $("#doorInsert-regId").val(),
+            devId: $("#doorInsert-devId").val()
+          }
+        });
+      }
+
+      function deleteDoor(key) {
+        $.ajax({url: "/api/doors?key=" + key, type: "DELETE"});
+      }
+
+      function openDoor(doorKey) {
+        $.ajax({url: "/api/open", type: "POST", data: {doorKey: doorKey}});
+      }
+
+      $(document).ajaxSuccess(function (evt, jqxhr, ajaxOptions) {
+        $("#response").text(JSON.stringify(data));
+      });
+
+      $(document).ajaxError(function (evt, jqxhr, settings, thrownError) {
+        $("#response").text(thrownError);
+      });
+    </script>
   </head>
   <body>
-    <form action="/api/door/apply" method="POST">
-      <input type="text" name="door_key" placeholder="Door Key"/>
-      <button type="submit">Apply for Access</button>
-    </form>
+    <h1>Permission Request</h1>
+    <div>
+      <input type="text" id="permissionInsert-doorKey" placeholder="Door Key"/>
+      <button onclick="insertPermission();">Apply for Access</button>
+    </div>
 
+    <h1>Doors</h1>
     <ul>
       {{range .Doors}}
         <li>
-          Door "{{.DisplayName}}" owned by
-          {{if .Own}}me{{else}}"{{.OwnerDisplayName}}"{{end}}
-          <br/>
           {{if .Openable}}
-            <form action="/api/door/open" method="POST">
-              <input type="hidden" name="door_key" value="{{.Key}}"/>
-              <button type="submit">Open</button>
-            </form>
+            <button onclick="openDoor('{{.Key}}');">Open</button>
           {{end}}
           {{if .Own}}
+            <button onclick="deleteDoor('{{.Key}}');">Delete</button>
+          {{end}}
+          "{{.DisplayName}}" owned by
+          {{if .Own}}me{{else}}"{{.OwnerDisplayName}}"{{end}}
+          <br/>
+          {{if .Own}}
             {{$dKey := .Key}}
-            Pending Users<br/>
+            {{$own := .Own}}
+
+            <h2>Pending Users</h2>
             <ul>
               {{range .PendingUsers}}
                 <li>
-                  <form action="/api/door/authorize" method="POST">
-                    <input type="hidden" name="user_key" value="{{.Key}}"/>
-                    <input type="hidden" name="door_key" value="{{$dKey}}"/>
-                    <button type="submit">Authorize</button> {{.DisplayName}}
-                  </form>
+                  <button
+                      onclick="updatePermission('{{.Key}}', '{{$dKey}}', 1);">
+                    Authorize
+                  </button>
+                  {{.DisplayName}}
                 </li>
               {{else}}
                 There are no pending users.
               {{end}}
             </ul>
 
-            Opener Users<br/>
+            <h2>Opener Users</h2>
             <ul>
               {{range .OpenerUsers}}
-                <li>{{.DisplayName}}</li>
+                <li>
+                  {{if $own}}
+                    <button
+                        onclick="deletePermission('{{.Key}}', '{{$dKey}}');">
+                      Remove
+                    </button>
+                  {{end}}
+                  {{.DisplayName}}
+                </li>
               {{else}}
                 There are no opener users.
               {{end}}
@@ -55,12 +119,18 @@
     </ul>
 
     {{if .Admin}}
-      <form action="/api/door/create" method="POST">
-        <input type="text" name="reg_id" placeholder="Registration Id"/><br/>
-        <input type="text" name="device_id" placeholder="Device Id"/><br/>
-        <button type="submit">Create Door</button>
-      </form>
+      <h1>Door Creation</h1>
+      <div>
+        <input type="text" id="doorInsert-displayName" placeholder="Display Name"/><br/>
+        <input type="text" id="doorInsert-regId" placeholder="Registration Id"/><br/>
+        <input type="text" id="doorInsert-devId" placeholder="Device Id"/><br/>
+        <button onclick="insertDoor();">Create Door</button>
+      </div>
     {{end}}
+
+    <h1>Response</h1>
+    <div id="response">
+    </div>
   </body>
 </html>
 {{end}}
