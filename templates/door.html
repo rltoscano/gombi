@@ -47,8 +47,8 @@
         $.ajax({url: "/api/open", type: "POST", data: {doorKey: doorKey}});
       }
 
-      $(document).ajaxSuccess(function (evt, jqxhr, ajaxOptions) {
-        $("#response").text(JSON.stringify(data));
+      $(document).ajaxSuccess(function (evt, xhr) {
+        $("#response").text(JSON.stringify(xhr.responseText));
       });
 
       $(document).ajaxError(function (evt, jqxhr, settings, thrownError) {
@@ -119,18 +119,24 @@
     </ul>
 
     {{if .Admin}}
-      <h1>Door Creation</h1>
+      <h1>Admin Tools</h1>
+      <h2>Door Creation</h2>
       <div>
         <input type="text" id="doorInsert-displayName" placeholder="Display Name"/><br/>
         <input type="text" id="doorInsert-regId" placeholder="Registration Id"/><br/>
         <input type="text" id="doorInsert-devId" placeholder="Device Id"/><br/>
         <button onclick="insertDoor();">Create Door</button>
       </div>
+
+      <h2>Config</h2>
+      <form action="/api/config" method="POST">
+        <input type="text" name="apiKey" placeholder="Api Key"/>
+        <button type="submit">Update</button>
+      </form>
     {{end}}
 
     <h1>Response</h1>
-    <div id="response">
-    </div>
+    <pre id="response"></pre>
   </body>
 </html>
 {{end}}

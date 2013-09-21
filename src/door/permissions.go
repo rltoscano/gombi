@@ -9,17 +9,12 @@ import(
 )
 
 func handlePermissions(
-    r *http.Request, c appengine.Context, u *user.User, m string) (
+    r *http.Request, c appengine.Context, u *user.User) (
     interface{}, error) {
-  if m == "POST" {
-    return insertPermission(r, c, u)
-  } else if m == "PUT" {
-    return updatePermission(r, c, u)
-  } else if m == "DELETE" {
-    return deletePermission(r, c, u)
-  } else {
-    return nil, ErrMethodNotAllowed
-  }
+  if        r.Method == "POST"   { return insertPermission(r, c, u)
+  } else if r.Method == "PUT"    { return updatePermission(r, c, u)
+  } else if r.Method == "DELETE" { return deletePermission(r, c, u)
+  } else {                         return nil, ErrMethodNotAllowed }
 }
 
 // API that allows a user to apply for permission to use a door. Requires

@@ -15,10 +15,12 @@ var (
   ErrNoOpenerPermission = Err{
       "Either the door doesn't exist or you don't have opener permission.",
       http.StatusBadRequest}
+  ErrNoConfig =
+      Err{"Service config uninitialized.", http.StatusServiceUnavailable}
 )
-func handleOpen(r *http.Request, c appengine.Context, u *user.User, m string) (
+func handleOpen(r *http.Request, c appengine.Context, u *user.User) (
     interface{}, error) {
-  if m != "POST" {
+  if r.Method != "POST" {
     return nil, ErrMethodNotAllowed
   }
   k, err := ds.DecodeKey(r.FormValue("doorKey"))
@@ -39,14 +41,15 @@ func handleOpen(r *http.Request, c appengine.Context, u *user.User, m string) (
   }
 
   config := Config{}
-  config, err  = getOrCreateConfig(c)
-  if err != nil {
-    c.Errorf("Failed to load service config: %s", err.Error())
+  if err = ds.Get(c, ds.NewKey(c, "Config", "singleton", 0, nil), &config);
+      err != nil {
+    if err == ds.ErrNoSuchEntity {
+      err = ErrNoConfig
+    }
     return nil, err
   }
   if config.ApiKey == "" {
-    return nil,
-        Err{"Service config uninitialized.", http.StatusServiceUnavailable}
+    return nil, ErrNoConfig
   }
 
   door := Door{}
@@ -71,20 +74,4 @@ func handleOpen(r *http.Request, c appengine.Context, u *user.User, m string) (
   }
 
   return response, nil
-}
-
-// Gets the singleton configuration of the door service. If the configuration
-// doesn't exist (e.g. new server, db wipe), a new one is created.
-func getOrCreateConfig(c appengine.Context) (Config, error) {
-  k := ds.NewKey(c, "Config", "singleton", 0, nil)
-  config := Config{}
-  if err := ds.Get(c, k, &config); err != nil {
-    if err != ds.ErrNoSuchEntity {
-      return config, err
-    }
-    if _, err := ds.Put(c, k, &config); err != nil {
-      return config, err
-    }
-  }
-  return config, nil
 }

@@ -14,9 +14,10 @@ func RegisterHandlers() {
   http.Handle("/api/open", ApiHandler{handleOpen})
   http.Handle("/api/doors", ApiHandler{handleDoors})
   http.Handle("/api/permissions", ApiHandler{handlePermissions})
+  http.Handle("/api/config", ApiHandler{handleConfig})
 }
 
-type ApiHandlerFunc func(*http.Request, appengine.Context, *user.User, string) (
+type ApiHandlerFunc func(*http.Request, appengine.Context, *user.User) (
     interface{}, error)
 
 type ApiHandler struct {
@@ -37,7 +38,7 @@ func (h ApiHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
     writeErr(w, ErrNoLogin, c)
     return
   }
-  objs, err := h.ApiFunc(r, c, u, r.Method)
+  objs, err := h.ApiFunc(r, c, u)
   if err != nil {
     writeErr(w, err, c)
     return
@@ -58,7 +59,7 @@ var (
 // Service configuration information. Singleton object.
 type Config struct {
   // API key used when contacting GCM service.
-  ApiKey string `datastore:"apiKey,noindex"`
+  ApiKey string `datastore:"apiKey,noindex" json:"apiKey"`
 }
 
 // Door. Currently, this is a singleton object in the database.

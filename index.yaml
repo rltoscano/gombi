@@ -10,33 +10,6 @@ indexes:
 # automatically uploaded to the admin console when you next deploy
 # your application using appcfg.py.
 
-- kind: Access
-  properties:
-  - name: DoorKey
-  - name: UserKey
-  - name: Level
-
-- kind: Access
-  properties:
-  - name: UserId
-  - name: Level
-
-- kind: Access
-  properties:
-  - name: UserKey
-  - name: Level
-
-- kind: DoorAccess
-  properties:
-  - name: DoorId
-  - name: Level
-
-- kind: DoorAccess
-  properties:
-  - name: DoorId
-  - name: UserId
-  - name: Level
-
 - kind: Permission
   properties:
   - name: doorKey

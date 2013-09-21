@@ -5,6 +5,7 @@ import(
   ds "appengine/datastore"
   "appengine/user"
   "net/http"
+  "strconv"
 )
 
 // Door struct used in API responses. Same as Door with an extra key field.
@@ -15,50 +16,56 @@ type ApiDoor struct {
   DevId string `json:"devId"`
 }
 
-func handleDoors(r *http.Request, c appengine.Context, u *user.User, m string) (
+func handleDoors(r *http.Request, c appengine.Context, u *user.User) (
     interface{}, error) {
-  if        m == "GET"    { return listDoors(r, c, u)
-  } else if m == "POST"   { return insertDoor(r, c, u)
-  } else if m == "PUT"    { return updateDoor(r, c, u)
-  } else if m == "DELETE" { return deleteDoor(r, c, u)
-  } else                  { return nil, ErrMethodNotAllowed }
+  if        r.Method == "GET"    { return listDoors(r, c, u)
+  } else if r.Method == "POST"   { return insertDoor(r, c, u)
+  } else if r.Method == "PUT"    { return updateDoor(r, c, u)
+  } else if r.Method == "DELETE" { return deleteDoor(r, c, u)
+  } else                         { return nil, ErrMethodNotAllowed }
 }
 
-// API that lists the doors the user has some permission to. Can be filtered by
-// permission level by using the "level" parameter.
+// API that lists the doors the user has some at least the given level of
+// permission to. Requires "level" parameter.
 func listDoors(
     r *http.Request, c appengine.Context, u *user.User) (*[]ApiDoor, error) {
-  lvl := r.FormValue("level")
-  devId := r.FormValue("devId")
   q := ds.NewQuery("Permission").
       Filter("userKey=", ds.NewKey(c, "User", u.ID, 0, nil))
-  if lvl != "" {
-    q = q.Filter("level=", lvl)
-  }
-  if devId != "" {
-    q = q.Filter("devId=", devId)
+  lvlStr := r.FormValue("level")
+  if lvlStr != "" {
+    lvl, err := strconv.Atoi(lvlStr)
+    if err != nil {
+      return nil, err
+    }
+    q = q.Filter("level>=", lvl)
   }
   permissions := []Permission{}
   if _, err := q.GetAll(c, &permissions); err != nil {
     return nil, err
   }
   doorKeys := make([]*ds.Key, len(permissions))
-  apiDoors := make([]ApiDoor, len(permissions))
   for i, p := range permissions {
     doorKeys[i] = p.DoorKey
-    apiDoors[i].Key = p.DoorKey.Encode()
   }
   doors := make([]Door, len(permissions))
   if err := ds.GetMulti(c, doorKeys, doors); err != nil {
     return nil, err
   }
+
+  // Filter and create API doors.
+  apiDoors := []ApiDoor{}
+  devId := r.FormValue("devId")
   for i, d := range doors {
-    apiDoors[i].DisplayName = d.DisplayName
+    if devId != "" && devId != d.DevId {
+      continue
+    }
+    apiDoor := ApiDoor{Key: doorKeys[i].Encode(), DisplayName: d.DisplayName}
     // Add fields only visible by owner.
     if permissions[i].Level >= LevelOwner {
-      apiDoors[i].RegId = d.RegId
-      apiDoors[i].DevId = d.DevId
+      apiDoor.RegId = d.RegId
+      apiDoor.DevId = d.DevId
     }
+    apiDoors = append(apiDoors, apiDoor)
   }
   return &apiDoors, nil
 }
@@ -109,9 +116,6 @@ func insertDoor(
 
 // API to update the display name and registration ID of a door. Only the owner
 // of the door can execute this API.
-var (
-  ErrDoorUpdateForbidden = Err{"Door update forbidden.", http.StatusForbidden}
-)
 func updateDoor(
     r *http.Request, c appengine.Context, u *user.User) (*[]ApiDoor, error) {
   k, err := ds.DecodeKey(r.FormValue("key"))
@@ -128,7 +132,7 @@ func updateDoor(
     return nil, err
   }
   if cnt == 0 {
-    return nil, ErrDoorUpdateForbidden
+    return nil, Err{"Door update forbidden.", http.StatusForbidden}
   }
 
   d := new(Door)
