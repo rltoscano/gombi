@@ -10,6 +10,9 @@ import (
 // API that updates the singleton configuration. Only accessible by admins.
 func handleConfig(
     r *http.Request, c appengine.Context, u *user.User) (interface{}, error) {
+  if !u.Admin {
+    return nil, Err{"Forbidden", http.StatusForbidden}
+  }
   if r.Method != "POST" {
     return nil, ErrMethodNotAllowed
   }

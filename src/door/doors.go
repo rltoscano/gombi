@@ -150,7 +150,7 @@ func updateDoor(
       d.RegId = regId
     }
 
-    _, err = ds.Put(c, k, &d)
+    _, err = ds.Put(c, k, d)
     return err
   }, nil)
 
