@@ -1,0 +1,98 @@
+<link rel="import" href="../bower_components/polymer/polymer.html">
+
+<polymer-element name="r-model">
+  <script>
+    (function() {
+      var mutable = {
+        page: 'showcase',
+        project: null
+      };
+      var projects = {
+        flashbrain: {
+          title: 'Flashbrain',
+          img: 'flashbrain-icon.png',
+          highlight: '#3f51b5',
+          titlefont: 'light',
+          desc: 'Foreign language learning with flash cards and spaced-repetition.'
+        },
+        door: {
+          title: 'Door',
+          titlefont: 'dark',
+          desc: 'Electrical installation to open automatically open an apartment door.'
+        },
+        grhungary: {
+          title: 'Grhungary',
+          img: 'bird.png',
+          padding: '16px',
+          highlight: '#93242b',
+          desc: 'Website I designed and built for our wedding.'
+        },
+        harbinger: {
+          title: 'Harbinger',
+          titlefont: 'dark',
+          desc: 'A home-made robot that animates as my commute home completes.'
+        },
+        giterdone: {
+          title: 'Giterdone',
+          img: 'giterdone-icon.png',
+          highlight: '#f05033',
+          desc: 'A Gedit plug-in that provides vcs visualization and management.'
+        },
+        ubislideshow: {
+          title: 'Ubislideshow',
+          img: 'slide-projector.png',
+          padding: '16px',
+          highlight: '#6b9bb7',
+          desc: 'A synchronized and distributed photo slideshow.'
+        },
+        straph: {
+          title: 'Straph',
+          img: 'straph-icon.png',
+          highlight: 'rgb(130,202,250)',
+          titlefont: 'dark',
+          desc: 'A web app that graphs real-time streaming data.'
+        },
+        photoweb: {
+          title: 'PhotoWeb',
+          titlefont: 'dark',
+          desc: 'A zen-simplistic photo album viewer that supports video files.'
+        },
+        phrygian: {
+          title: 'Phrygian',
+          titlefont: 'dark',
+          desc: 'A web-based music player and library manager.'
+        },
+        haga: {
+          title: 'HAGA',
+          img: 'haga-icon.png',
+          highlight: '#ffafaf',
+          titlefont: 'dark',
+          desc: 'A smart global sequence aligner UI tool.'
+        },
+        huggable: {
+          title: 'Huggable',
+          img: 'huggable.jpg',
+          highlight: '#f8bf34',
+          titlefont: 'dark',
+          desc: 'A new type of therapeutic robotic companion.'
+        },
+        tcp: {
+          title: 'Tangible Color Palette',
+          img: 'tcp-icon.png',
+          highlight: '#01826c',
+          desc: 'A tangible interface to a color palette.'
+        }
+      };
+      Polymer('r-model', {
+        computed: {
+          page: 'mutable.page',
+          project: 'mutable.project'
+        },
+        created: function() {
+          this.mutable = mutable;
+          this.projects = projects;
+        }
+      });
+    })();
+  </script>
+</polymer-element>

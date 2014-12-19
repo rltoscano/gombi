@@ -1,0 +1,36 @@
+<link rel="import" href="../bower_components/polymer/polymer.html">
+<link rel="import" href="r-model.html">
+
+<polymer-element name="r-location">
+  <template>
+    <r-model id="model"></r-model>
+  </template>
+  <script>
+    Polymer('r-location', {
+      observe: {
+        '$.model.mutable.page': 'modelChanged',
+        '$.model.mutable.project': 'modelChanged'
+      },
+      ready: function() {
+        var hash = window.location.hash.substring(1);
+        if (!hash) {
+          return;
+        }
+        if (hash.indexOf('/') == -1) {
+          this.$.model.mutable.page = hash;
+          return;
+        }
+        var parts = hash.split('/');
+        this.$.model.mutable.page = parts[0];
+        this.$.model.mutable.project = parts[1];
+      },
+      modelChanged: function() {
+        var newHash = this.$.model.mutable.page;
+        if (this.$.model.mutable.project) {
+          newHash += '/' + this.$.model.mutable.project;
+        }
+        window.location.hash = newHash;
+      }
+    });
+  </script>
+</polymer-element>

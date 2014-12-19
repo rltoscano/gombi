@@ -4,5 +4,18 @@ runtime: go
 api_version: go1
 
 handlers:
-- url: /.*
+- url: /straph/.*
   script: _go_app
+- url: /door
+  script: _go_app
+- url: /api/.*
+  script: _go_app
+- url: /
+  static_files: root/index.html
+  upload: root/index.html
+- url: /elements
+  static_dir: root/elements
+- url: /bower_components
+  static_dir: root/bower_components
+- url: /images
+  static_dir: root/images

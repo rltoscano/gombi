@@ -1,0 +1,34 @@
+<link rel="import" href="../bower_components/paper-shadow/paper-shadow.html">
+<link rel="import" href="../bower_components/polymer/polymer.html">
+
+<polymer-element name="r-screenshot" attributes="imgname width">
+  <template>
+    <style>
+      :host {
+        display: inline-block;
+        max-width: {{width}};
+        background-color: #f9f9f9;
+        margin: 16px;
+      }
+      #caption {
+        text-align: center;
+        padding: 20px 8px 8px 8px;
+        font-size: 80%;
+      }
+      #img {
+        width: 100%;
+        margin-bottom: -4px;
+      }
+    </style>
+    <paper-shadow z="3">
+      <img id="img" src="../images/{{imgname}}">
+    </paper-shadow>
+    <div id="caption"><content></content></div>
+  </template>
+
+  <script>
+    Polymer('r-screenshot', {
+      width: '240px'
+    });
+  </script>
+</polymer-element>
