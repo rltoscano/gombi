@@ -1,0 +1,7 @@
+{
+  "name": "gombi",
+  "short_name": "gombi",
+  "description": "gombi",
+  "start_url": "/",
+  "display": "standalone"
+}

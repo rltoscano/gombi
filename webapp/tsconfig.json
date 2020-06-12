@@ -1,0 +1,22 @@
+{
+  "compilerOptions": {
+    "target": "es2017",
+    "module": "es2015",
+    "moduleResolution": "node",
+    "lib": ["es2017", "dom"],
+    "experimentalDecorators": true,
+    "outDir": "jsgen",
+    "rootDir": "src",
+    "noEmitOnError": true,
+    "noImplicitAny": true,
+  },
+  "include": [
+    "src/**/*",
+  ],
+  "exclude": [
+    "build",
+    "node_modules",
+    "jsgen",
+    "**/*.spec.ts",
+  ],
+}
